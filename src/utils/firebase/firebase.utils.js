@@ -16,7 +16,12 @@ import {
     getFirestore,
     doc,
     getDoc,
-    setDoc
+    setDoc,
+    collection,
+    writeBatch,
+    getDocs,
+    query
+    
 } from "firebase/firestore";
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -33,6 +38,7 @@ const firebaseConfig = {
     appId             : process.env.REACT_APP_appId            ,
     measurementId     : process.env.REACT_APP_measurementId    
 };
+
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -94,4 +100,44 @@ export const signOutUser =async()=>{
 // listens to whenver authentication state changes
 export const authenticationListener =(callback)=>{
   return  onAuthStateChanged(auth,callback)
+}
+
+
+// create colletction with the document
+export const addCollectionAndDocuments =async(collectionKey,objectsToAdd)=>{
+    // get collection refernce and inttializet batch using writeBatch method
+    const collectionReference =collection(db,collectionKey)
+    const batch =writeBatch(db)
+   
+    // Setting objects as document 
+    objectsToAdd.forEach(object => {
+        //get document referendce
+        const docReference =doc(collectionReference,object.title.toLowerCase())    
+        // create batch document
+        batch.set(docReference,object)
+    });
+
+    // write the batch document and commit
+    await batch.commit()
+    console.log("Document created")
+
+}
+
+// get category collection and its document
+
+export const getCategoryAndDocuments =async()=>{
+    const collectionReference =collection(db,"category");
+    const queryInstance=  query(collectionReference);
+    
+    const querySnapshot =await getDocs(queryInstance);
+    // console.log("Products Firestore",querySnapshot.docs)
+    const catergoryMap= querySnapshot.docs.reduce((acc,docSnapShot)=>{
+        const {title,items} =docSnapShot.data()
+        acc[title.toLowerCase()]=items;
+        return acc;
+    },{});
+
+    console.log("Products",catergoryMap)
+    return catergoryMap;
+
 }

@@ -11,11 +11,12 @@ export const UserContext = createContext({
 
 // wrapper component that passes the UserContext object to the child components which can be later consumed through useContext method which returns the value property of this component
 export const UserProvider=  ({children})=>{
-    
+    console.log("User Provider")
     const [currentUser,setCurrentUser]=useState(null)
     const value ={currentUser,setCurrentUser};
     useEffect(()=>{
         authenticationListener(async (user)=>{
+            console.log("Auth Listener")
             setCurrentUser(user)
             if(user){
                 console.log("User",user)
